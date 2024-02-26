@@ -2,9 +2,12 @@
 
 var consulClient = new ConsulClient(c =>
 {
-    c.Address = new Uri("http://proddocker01.qual.local:8500");
+    Console.WriteLine("Put your Consul URL");
+    c.Address = new Uri(Console.ReadLine());
+    Console.WriteLine("Put your Consul TOKEN");
+
     // Substitua "seu-token-aqui" pelo seu token de acesso real
-    c.Token = "FBAF54CC-E03D-4763-9F19-376114D3857B";
+    c.Token = Console.ReadLine(); //"FBAF54CC-E03D-4763-9F19-376114D3857B";
 });
 
 // Substitua "nomeInicial" pelo prefix desejado

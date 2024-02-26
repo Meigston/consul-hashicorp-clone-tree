@@ -3,7 +3,7 @@
 var consulClient = new ConsulClient(c =>
 {
     Console.WriteLine("Put your Consul URL");
-    c.Address = new Uri(Console.ReadLine());
+    c.Address = new Uri(Console.ReadLine() ?? "http://localhost:8500");
     Console.WriteLine("Put your Consul TOKEN");
 
     // Substitua "seu-token-aqui" pelo seu token de acesso real

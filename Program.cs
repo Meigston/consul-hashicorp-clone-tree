@@ -45,9 +45,6 @@ static async Task MenuOption(ConsulClient consulClient)
             Console.Clear();
             Console.WriteLine($"Settings cloned successfully. {Environment.NewLine}");
             break;
-        //case "4":
-        //    initConsul = true;
-        //    break;
         default:
             Console.WriteLine("Invalid option.");
             break;

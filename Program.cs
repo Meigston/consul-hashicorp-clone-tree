@@ -1,4 +1,5 @@
 ﻿using Consul;
+using System.Text;
 using System.Text.Json;
 
 //ConsulClient consulClient = CreateConsulClient();
@@ -20,7 +21,7 @@ static async Task MenuOption(ConsulClient consulClient)
             Console.WriteLine("Enter the settings prefix to export: ");
             var prefixToExport = Console.ReadLine();
 
-            Console.WriteLine("Enter the file path to save the settings: ");
+            Console.WriteLine("Enter the file path to save the settings. ex: c:/temp/my-export.json ");
             var exportFilePath = Console.ReadLine();
 
             await ExportConfigurations(consulClient, prefixToExport, exportFilePath);
@@ -29,7 +30,7 @@ static async Task MenuOption(ConsulClient consulClient)
             Console.WriteLine($"Settings exported successfully. {Environment.NewLine}");
             break;
         case "2":
-            Console.WriteLine("Enter the file path of the settings to import: ");
+            Console.WriteLine("Enter the file path of the settings to import.  ex: c:/temp/my-export.json");
             var importFilePath = Console.ReadLine();
 
             Console.WriteLine("Enter the new prefix for the imported settings: ");
@@ -83,21 +84,43 @@ static async Task CloneStructure(ConsulClient consulClient)
 static async Task ExportConfigurations(ConsulClient consulClient, string prefix, string filePath)
 {
     var keysEValues = await FindKeys(consulClient, prefix);
-    var json = System.Text.Json.JsonSerializer.Serialize(keysEValues, new JsonSerializerOptions { WriteIndented = true });
-    await System.IO.File.WriteAllTextAsync(filePath, json);
+    var consulFormatList = new List<Dictionary<string, string>>();
+
+    foreach (var pair in keysEValues)
+    {
+        consulFormatList.Add(new Dictionary<string, string>
+        {
+            { "Key", pair.Key },
+            { "Value", Convert.ToBase64String(Encoding.UTF8.GetBytes(pair.Value)) }
+        });
+    }
+
+    var json = JsonSerializer.Serialize(consulFormatList, new JsonSerializerOptions { WriteIndented = true });
+    await File.WriteAllTextAsync(filePath, json);
 }
+
 
 static async Task ImportConfigurations(ConsulClient consulClient, string filePath, string newPrefix)
 {
-    var json = await System.IO.File.ReadAllTextAsync(filePath);
-    var keysEValues = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+    var json = await File.ReadAllTextAsync(filePath);
+    var consulFormatList = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
 
-    foreach (var par in keysEValues)
+    if (consulFormatList != null)
     {
-        Console.WriteLine($"Key: {par.Key}, Value: {par.Value}");
-        await CreateKey(consulClient, $"{newPrefix}/{par.Key}", par.Value);
+        foreach (var item in consulFormatList)
+        {
+            var key = item.ContainsKey("Key") ? item["Key"] : null;
+            var value = item.ContainsKey("Value") ? item["Value"] : null;
+
+            if (key != null && value != null)
+            {
+                Console.WriteLine($"Key: {key}, Value: {value}");
+                await CreateKey(consulClient, $"{newPrefix}/{key}", Encoding.UTF8.GetString(Convert.FromBase64String(value)));
+            }
+        }
     }
 }
+
 
 
 static async Task<Dictionary<string, string>> FindKeys(ConsulClient client, string prefix)

@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  consul:
+    image: hashicorp/consul:1.11.2
+    volumes:
+      - /temp/consul/configuration:/consul/config
+      - /temp/infrastructure_data/consul:/consul/data
+    ports:
+      - "8500:8500"
+    restart: unless-stopped
+    command: "agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -config-dir=/consul/config"
+
+  consul-config-importer:
+    image: alpine:latest
+    volumes:
+      - /temp/consul/importer-data/config-data-to-import.json:/tmp/configs/config-data-to-import.json
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
+      - CONSUL_TOKEN=FBAF54CC-E03D-4763-9F19-376114D3857B
+      - BASE_KEY=docker
+    depends_on:
+      - consul
+    command: >
+      /bin/sh -c "
+        apk add --no-cache curl jq &&
+        echo 'Waiting for Consul to start...' &&
+        sleep 10 &&
+        jq -c '.[]' /tmp/configs/config-data-to-import.json | while read i; do
+          key=\$$(echo $$i | jq -r '.Key') &&
+          value=\$$(echo $$i | jq -r '.Value' | base64 -d) &&
+          curl -X PUT -H \"X-Consul-Token: $${CONSUL_TOKEN}\" --data-binary \"\$${value}\" \"$${CONSUL_HTTP_ADDR}/v1/kv/\$${BASE_KEY}/\$${key}\";
+        done &&
+        echo 'Configurations imported successfully.' &&
+        exit 0"

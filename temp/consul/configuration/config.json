@@ -10,8 +10,8 @@
   "advertise_addr": "127.0.0.0",
   "ui": true,
   "acl_datacenter": "FJT",
-  "acl_master_token": "FBAF54CC-E03D-4763-9F19-376114D3857B",
+  "acl_master_token": "eea249e46a7682219dce10355ae62e4a18c11b54df26022c6c81c30eed912996",
   "acl_default_policy": "deny",
   "acl_down_policy": "extend-cache",
-  "acl_agent_token": "f710a920-bb12-b356-ea1f-80f85f88f80b"
+  "acl_agent_token": "1a2311adf8a5041e3268cdc96f2b492674b268570a319f8294844dd48e729ee2"
 }

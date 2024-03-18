@@ -1,5 +1,5 @@
 {
-  "datacenter": "FJT",
+  "datacenter": "YOUR_COMPANY",
   "data_dir": "/consul/data/",
   "log_level": "INFO",
   "node_name": "node1",
@@ -9,7 +9,7 @@
   "bind_addr": "0.0.0.0",
   "advertise_addr": "127.0.0.0",
   "ui": true,
-  "acl_datacenter": "FJT",
+  "acl_datacenter": "YOUR_COMPANY",
   "acl_master_token": "eea249e46a7682219dce10355ae62e4a18c11b54df26022c6c81c30eed912996",
   "acl_default_policy": "deny",
   "acl_down_policy": "extend-cache",

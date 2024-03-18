@@ -1,23 +1,24 @@
-# Using Console with Consul
+## Using Console with Consul
 
 This is a C# code example that interacts with Consul to export, import, and clone configurations.
 
-## Requirements
+### Requirements
 
 - .NET Core SDK
 - NuGet Package: Consul
 
-## How to Use
+### How to Use
 
 1. Clone this repository.
-2. Build the project using the command `dotnet build`.
-3. Run the program using the command `dotnet run`.
+2. Navigate to the project directory.
+3. Build the project using the command `dotnet build`.
+4. Run the program using the command `dotnet run`.
 
-## Features
+### Features
 
 The program offers the following options:
 
-### Export Configurations
+#### Export Configurations
 
 Exports configurations from Consul to a JSON file.
 
@@ -31,7 +32,7 @@ var exportFilePath = Console.ReadLine();
 await ExportConfigurations(consulClient, prefixToExport, exportFilePath);
 ```
 
-### Import Configurations
+#### Import Configurations
 
 Imports configurations from a JSON file to Consul.
 
@@ -45,7 +46,7 @@ var newPrefixForImport = Console.ReadLine();
 await ImportConfigurations(consulClient, importFilePath, newPrefixForImport);
 ```
 
-### Clone Structure
+#### Clone Structure
 
 Clones the configuration structure from one prefix to another.
 
@@ -63,7 +64,7 @@ foreach (var par in keysEValues)
 }
 ```
 
-## Notes
+### Notes
 
 - Make sure you have the proper permissions to access Consul.
 - Make sure you have a running instance of Consul before using this program.
@@ -72,3 +73,5 @@ foreach (var par in keysEValues)
 ---
 
 Developed by [Meigston](https://github.com/Meigston).
+
+For testing purposes, there's a docker-compose file that will spin up a Consul instance with predefined configuration. This allows testing the application by performing an export or importing a new configuration.

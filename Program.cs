@@ -12,7 +12,7 @@ while (true)
 
 static async Task MenuOption(ConsulClient consulClient)
 {
-    Console.WriteLine($"Choose an option:{Environment.NewLine} 1) Export {Environment.NewLine} 2) Import {Environment.NewLine} 3) Clone");
+    Console.WriteLine($"Choose an option:{Environment.NewLine} 1) Export {Environment.NewLine} 2) Import {Environment.NewLine} 3) Clone {Environment.NewLine} 4) Clone and Migrate key to new prefix");
     var opcao = Console.ReadLine();
 
     switch (opcao)
@@ -43,8 +43,15 @@ static async Task MenuOption(ConsulClient consulClient)
             break;
         case "3":
             await CloneStructure(consulClient);
+
             Console.Clear();
             Console.WriteLine($"Settings cloned successfully. {Environment.NewLine}");
+            break;
+        case "4":
+            await CloneStructure(consulClient, true);
+
+            Console.Clear();
+            Console.WriteLine($"Settings cloned and migrated successfully. {Environment.NewLine}");
             break;
         default:
             Console.WriteLine("Invalid option.");
@@ -65,7 +72,7 @@ static ConsulClient CreateConsulClient()
     });
 }
 
-static async Task CloneStructure(ConsulClient consulClient)
+static async Task CloneStructure(ConsulClient consulClient, bool migrate = false)
 {
     Console.WriteLine("Enter the prefix you want to clone: ");
     var prefix = Console.ReadLine();
@@ -76,8 +83,17 @@ static async Task CloneStructure(ConsulClient consulClient)
 
     foreach (var par in keysEValues)
     {
-        Console.WriteLine($"Key: {par.Key}, Value: {par.Value}");
-        await CreateKey(consulClient, $"{newPrefix}/{par.Key}", par.Value);
+        if (migrate)
+        {
+            var updatedValue = par.Value.Replace($"{{{{ key '{prefix}", $"{{{{ key '{newPrefix}");
+            Console.WriteLine($"Key: {par.Key}, Value: {updatedValue}");
+            await CreateKey(consulClient, $"{newPrefix}/{par.Key}", updatedValue);
+        }
+        else
+        {
+            Console.WriteLine($"Key: {par.Key}, Value: {par.Value}");
+            await CreateKey(consulClient, $"{newPrefix}/{par.Key}", par.Value);
+        }
     }
 }
 
@@ -122,7 +138,6 @@ static async Task ImportConfigurations(ConsulClient consulClient, string filePat
 }
 
 
-
 static async Task<Dictionary<string, string>> FindKeys(ConsulClient client, string prefix)
 {
     var keysEValues = new Dictionary<string, string>();
@@ -135,7 +150,7 @@ static async Task<Dictionary<string, string>> FindKeys(ConsulClient client, stri
             var key = kv.Key.Substring(prefix.Length).TrimStart('/');
             if (kv.Value != null)
             {
-                var value = System.Text.Encoding.UTF8.GetString(kv.Value, 0, kv.Value.Length);
+                var value = Encoding.UTF8.GetString(kv.Value, 0, kv.Value.Length);
                 keysEValues[key] = value;
             }
         }
@@ -148,7 +163,7 @@ static async Task CreateKey(ConsulClient client, string key, string valor)
 {
     var kvPair = new KVPair(key)
     {
-        Value = System.Text.Encoding.UTF8.GetBytes(valor)
+        Value = Encoding.UTF8.GetBytes(valor)
     };
 
     await client.KV.Put(kvPair);

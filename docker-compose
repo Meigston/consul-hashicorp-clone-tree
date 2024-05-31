@@ -16,7 +16,7 @@ services:
       - /temp/consul/importer-data/config-data-to-import.json:/tmp/configs/config-data-to-import.json
     environment:
       - CONSUL_HTTP_ADDR=http://consul:8500
-      - CONSUL_TOKEN=FBAF54CC-E03D-4763-9F19-376114D3857B
+      - CONSUL_TOKEN=eea249e46a7682219dce10355ae62e4a18c11b54df26022c6c81c30eed912996
       - BASE_KEY=docker
     depends_on:
       - consul
